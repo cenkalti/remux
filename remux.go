@@ -56,7 +56,7 @@ func (r Remux) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		for i := range names {
 			params.Add(":"+names[i], submatches[i])
 		}
-		req.URL.RawQuery = url.Values(params).Encode() + "&" + req.URL.RawQuery
+		req.URL.RawQuery = params.Encode() + "&" + req.URL.RawQuery
 		h.ServeHTTP(w, req)
 		return
 	}
