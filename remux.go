@@ -67,6 +67,7 @@ func (r Remux) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// Method restricts the handler to be executed only on specific method.
 func (h *regexHandler) Method(m string) *regexHandler {
 	if h.allowedMethods == nil {
 		h.allowedMethods = make(map[string]struct{})
