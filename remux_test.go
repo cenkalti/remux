@@ -14,7 +14,7 @@ func Example() {
 	}
 
 	var r remux.Remux
-	r.HandleFunc("/hello/(?P<name>.+)", helloHandler)
+	r.HandleFunc("/hello/(?P<name>.+)", helloHandler).Get()
 
 	go http.ListenAndServe("127.0.0.1:5000", r)
 
@@ -29,7 +29,7 @@ func TestRemux(t *testing.T) {
 	}
 
 	var r remux.Remux
-	r.HandleFunc("/asdf", testHandler)
+	r.HandleFunc("/asdf", testHandler).Get()
 
 	req, _ := http.NewRequest("GET", "http://localhost/asdf", nil)
 	req.RequestURI = "/asdf"
