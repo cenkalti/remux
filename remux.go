@@ -33,7 +33,7 @@ func (s *Remux) Handle(regex string, handler http.Handler) {
 	s.handlers = append(s.handlers, h)
 }
 
-func (s *Remux) HandleFunc(regex string, f func(w http.ResponseWriter, r *http.Request)) {
+func (s *Remux) HandleFunc(regex string, f func(http.ResponseWriter, *http.Request)) {
 	s.Handle(regex, http.HandlerFunc(f))
 }
 
