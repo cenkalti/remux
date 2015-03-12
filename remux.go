@@ -16,10 +16,13 @@ import (
 
 type Remux struct {
 	NotFoundHandler http.Handler
-	handlers        []*regexHandler
+	handlers        []*Handler
 }
 
-type regexHandler struct {
+// Handler is type of returned value from Remux's Handle and HandleFunc methods.
+// You can restrict the handler to run only on specified methods by calling Get, Head, Post, Put, Delete and Options methods.
+// These methods are chainable.
+type Handler struct {
 	pattern        *regexp.Regexp
 	allowedMethods map[string]struct{}
 	http.Handler
@@ -27,15 +30,15 @@ type regexHandler struct {
 
 // Handle adds a new handler for requests matching regex.
 // Panics if regex does not compile.
-// When a request received, registered handlers are checked in FIFO order.
-func (r *Remux) Handle(regex string, handler http.Handler) *regexHandler {
+// When a request received, registered handlers are checked in the same order they are registered.
+func (r *Remux) Handle(regex string, handler http.Handler) *Handler {
 	pattern := regexp.MustCompile(regex)
-	h := &regexHandler{pattern, nil, handler}
+	h := &Handler{pattern, nil, handler}
 	r.handlers = append(r.handlers, h)
 	return h
 }
 
-func (r *Remux) HandleFunc(regex string, f func(http.ResponseWriter, *http.Request)) *regexHandler {
+func (r *Remux) HandleFunc(regex string, f func(http.ResponseWriter, *http.Request)) *Handler {
 	return r.Handle(regex, http.HandlerFunc(f))
 }
 
@@ -67,8 +70,8 @@ func (r Remux) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// Method restricts the handler to be executed only on specific method.
-func (h *regexHandler) Method(m string) *regexHandler {
+// method restricts the handler to be executed only on specific method.
+func (h *Handler) method(m string) *Handler {
 	if h.allowedMethods == nil {
 		h.allowedMethods = make(map[string]struct{})
 	}
@@ -76,9 +79,9 @@ func (h *regexHandler) Method(m string) *regexHandler {
 	return h
 }
 
-func (h *regexHandler) Head() *regexHandler    { return h.Method("HEAD") }
-func (h *regexHandler) Get() *regexHandler     { return h.Method("GET") }
-func (h *regexHandler) Post() *regexHandler    { return h.Method("POST") }
-func (h *regexHandler) Put() *regexHandler     { return h.Method("PUT") }
-func (h *regexHandler) Delete() *regexHandler  { return h.Method("DELETE") }
-func (h *regexHandler) Options() *regexHandler { return h.Method("OPTIONS") }
+func (h *Handler) Head() *Handler    { return h.method("HEAD") }
+func (h *Handler) Get() *Handler     { return h.method("GET") }
+func (h *Handler) Post() *Handler    { return h.method("POST") }
+func (h *Handler) Put() *Handler     { return h.method("PUT") }
+func (h *Handler) Delete() *Handler  { return h.method("DELETE") }
+func (h *Handler) Options() *Handler { return h.method("OPTIONS") }
